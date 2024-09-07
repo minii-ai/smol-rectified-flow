@@ -12,12 +12,12 @@ pip install -r requirements.txt
 ## Training
 
 ```bash
-python3 scripts/train_mnist.py -c ./configs/mnist_rectified_flow.py
+python3 scripts/train_mnist.py -c ./configs/mnist_rectified_flow.json
 ```
 
-```json
-// configs/mnist_rectified_flow.json
+Example config.json file
 
+```json
 {
   "rectified_flow": {
     "in_channels": 1,

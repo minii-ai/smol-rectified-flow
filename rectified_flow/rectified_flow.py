@@ -26,6 +26,11 @@ class RectifiedFlow(nn.Module):
 
     @staticmethod
     def add_noise(x0: torch.Tensor, t: torch.Tensor, noise: torch.Tensor = None):
+        """
+        Linearly interpolate X0 ~ pi_0 and X1 (noise) ~ pi_1 to get Xt.
+        Xt = t * X1 + (1 - t) * X0
+        """
+
         if noise is None:
             noise = torch.randn_like(x0, device=x0.device)
 
@@ -35,6 +40,9 @@ class RectifiedFlow(nn.Module):
 
     @staticmethod
     def get_timesteps(num_steps: int):
+        """
+        Get timesteps from [1, 0) with `num_steps` steps for backward sampling.
+        """
         timesteps = torch.linspace(1, 0, num_steps + 1)
         return timesteps.tolist()[:-1]
 
@@ -46,6 +54,11 @@ class RectifiedFlow(nn.Module):
         shape: Tuple[int, ...] = None,
         cond: torch.Tensor = None,
     ):
+        """
+        Backward sample using the euler method to transport samples from the gaussian noise
+        distribution to the data distribution.
+        """
+
         assert (
             shape is not None
         ), "Pass a shape that is not None to sample with rectified flow"
@@ -66,6 +79,15 @@ class RectifiedFlow(nn.Module):
         return x
 
     def forward(self, x0: torch.Tensor, cond: torch.Tensor = None):
+        """
+        Compute the loss for rectified flow.
+
+        1. Sample timesteps uniformly between [0, 1]
+        2. Get Xt = t * X0 + (1 - t) * X1
+        3. Predict drift X1 - X0 from Xt
+        4. Compute mse loss between predicted drift and actual drift
+        """
+
         B = x0.shape[0]
 
         # sample time step uniformly between [0, 1]

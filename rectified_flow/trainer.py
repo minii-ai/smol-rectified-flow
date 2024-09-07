@@ -96,7 +96,6 @@ class RectifiedFlowTrainer:
 
         # Convert buffer image to tensor
         image_tensor = torch.tensor(plt.imread(buf)).permute(2, 0, 1)
-        print(image_tensor.shape)
         self.writer.add_image(f"samples", image_tensor, iteration)
 
     def train(self):
@@ -138,3 +137,4 @@ class RectifiedFlowTrainer:
 
         # save final checkpoint
         self.checkpoint(rectified_flow, self.num_train_steps)
+        print("[INFO] Finished training")
