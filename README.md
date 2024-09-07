@@ -3,6 +3,8 @@
 Implementation of "Flow Straight and Fast: Learning to Generate and Transfer Data with Rectified Flow"
 https://arxiv.org/abs/2209.03003 on MNIST
 
+![alt text](generations.png)
+
 ## Installation
 
 ```bash
