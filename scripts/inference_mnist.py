@@ -25,9 +25,9 @@ def parse_args():
         required=True,
     )
     parser.add_argument("-w", "--weights", type=str, required=True)
-    parser.add_argument("--num_steps", type=int, default=16)
-    parser.add_argument("--cls", type=int, default=0)
-    parser.add_argument("--output_dir", type=str, default="./output")
+    parser.add_argument("-n", "--num_steps", type=int, default=16)
+    parser.add_argument("-k", "--cls", type=int, default=0)
+    parser.add_argument("-o", "--output_dir", type=str, default="./output")
 
     return parser.parse_args()
 
