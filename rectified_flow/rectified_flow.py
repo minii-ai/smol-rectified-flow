@@ -1,13 +1,9 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch.utils.data import Dataset, DataLoader
-from torch.optim.adam import Adam
 from improved_diffusion.unet import UNetModel
 from tqdm import tqdm
 from typing import Tuple
-
-from .utils import get_device
 
 
 def extend(t: torch.Tensor, shape: torch.Size):
@@ -22,6 +18,11 @@ class RectifiedFlow(nn.Module):
     @property
     def device(self):
         return next(self.model.parameters()).device
+
+    @staticmethod
+    def from_config(config: dict):
+        unet = UNetModel(**config)
+        return RectifiedFlow(unet)
 
     @staticmethod
     def add_noise(x0: torch.Tensor, t: torch.Tensor, noise: torch.Tensor = None):
@@ -53,6 +54,7 @@ class RectifiedFlow(nn.Module):
         x = torch.randn((num_samples, *shape), device=self.device)
         timesteps = RectifiedFlow.get_timesteps(num_steps)
 
+        # euler method
         for t in tqdm(timesteps):
             t = torch.tensor(
                 [t for _ in range(num_samples)],
@@ -79,49 +81,3 @@ class RectifiedFlow(nn.Module):
         loss = F.mse_loss(pred_drift, drift)
 
         return loss
-
-
-def cycle(dl):
-    while True:
-        for batch in dl:
-            yield batch
-
-
-class RectifiedFlowTrainer:
-    def __init__(
-        self,
-        rectified_flow: RectifiedFlow,
-        dataset: Dataset,
-        lr: float = 3e-4,
-        batch_size: int = 16,
-        num_train_steps: int = 50000,
-        device: str = None,
-        checkpoint_dir: str = None,
-    ):
-        self.rectified_flow = rectified_flow
-        self.dataset = dataset
-        self.dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
-        self.optimizer = Adam(rectified_flow.parameters(), lr=lr)
-        self.lr = lr
-        self.batch_size = batch_size
-        self.num_train_steps = num_train_steps
-        self.device = device if device else get_device()
-        self.checkpoint_dir = checkpoint_dir
-
-    def train(self):
-        rectified_flow = self.rectified_flow
-        rectified_flow.to(self.device)
-        rectified_flow.train()
-
-        train_loader = cycle(self.dataloader)
-        pbar = tqdm(range(self.num_train_steps))
-        for i in pbar:
-            img, cond = next(train_loader)
-            img, cond = img.to(self.device), cond.to(self.device)
-            loss = rectified_flow(img, cond)
-
-            pbar.set_postfix(loss=loss.item())
-
-            self.optimizer.zero_grad()
-            loss.backward()
-            self.optimizer.step()

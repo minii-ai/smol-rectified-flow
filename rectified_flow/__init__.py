@@ -1,1 +1,2 @@
-from .rectified_flow import RectifiedFlow, RectifiedFlowTrainer
+from .rectified_flow import RectifiedFlow
+from .trainer import RectifiedFlowTrainer
