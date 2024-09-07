@@ -4,9 +4,5 @@ Implementation of "Flow Straight and Fast: Learning to Generate and Transfer Dat
 
 todos
 
-- add checkpointing
-- add validation sampling during training
 - add script for inference
-- add script for training
-- add reflow
 - write readme
